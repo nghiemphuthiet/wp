@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+    <div class="container" style="display:flex;">
+        <div class="canvas">
+            <canvas id="myCanvas"></canvas>
+        </div>
+        <div class="choose-order">
+            <div class="option-fix">
+                <div class="items-option">
+                    <div class="item-option">
+                        Loại vật liệu:
+                        <select id="material-type">
+                            <option value="140000">I</option>
+                            <option value="110000">II</option>
+                            <option value="90000">III</option>
+                        </select>
+                    </div>
+                    <div class="item-option">
+                        Độ dày (mm):
+                        <select id="thickness">
+                            <option value="0.6">0.6</option>
+                            <option value="0.8">0.8</option>
+                            <option value="1">1</option>
+                            <option value="1.2">1.2</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="items-option">
+                    <div class="item-option">
+                        Màu sắc:
+                        <select id="color">
+                            <option value="0.9">Trắng</option>
+                            <option value="1">Vàng</option>
+                            <option value="1.2">Đồng</option>
+                            <option value="1.4">Đen</option>
+                        </select>
+                    </div>
+                    <div class="item-option">
+                        Chiều dài (m):
+                        <select id="long">
+                            <option value="2.4">2.4</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="add-line">
+                Tùy chỉnh:
+                <i>Đơn vị: cạnh (mm), góc (độ)</i>
+            </div>
+            <div class="add-line">
+                Bắt đầu cách Ox: <input class="point-begin begin-ox" /> & Oy: <input class="point-begin begin-oy" />
+            </div>
+            <div class="add-line"><button id="addLine">+ Thêm cạnh</button></div>
+            <div class="move-option">
+                <div class="item-move-option">
+                    <span>a</span>: <input class="line-width edge" /> Góc với Ox: <input class="line-width corner" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <style>
+    .canvas {
+        width: 40%;
+    }
+
+    #myCanvas {
+        border: 1px solid #c3c3c3;
+        width: 100%;
+        height: 100%;
+    }
+
+    .choose-order {
+        width: 60%;
+        padding-left: 16px;
+    }
+
+    .option-fix {
+        display: flex;
+        width: 100%;
+    }
+
+    .items-option {
+        width: 50%;
+    }
+
+    select {
+        margin: 0 16px 0 8px;
+        max-width: 130px;
+        padding: 0px;
+        outline: none;
+        height: 30px;
+    }
+
+    .item-option {
+        display: flex;
+        padding: 4px 0;
+    }
+
+    .add-line {
+        margin: 8px 0;
+    }
+
+    .item-move-option {
+        display: flex;
+        margin: 8px 0;
+    }
+
+    #addLine {
+        padding: 8px;
+    }
+
+    .item-move-option input {
+        margin: 0 8px;
+        padding-left: 4px;
+        outline: none;
+    }
+
+    .point-begin,
+    .line-width {
+        width: 50px
+    }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        $("#addLine").click(function() {
+            if (checkInput() == true) {
+                var text = $('.move-option').find('span').last().text();
+                var div = `<div class="item-move-option">
+                        <span>` + String.fromCharCode(text.charCodeAt() + 1) + `</span>: <input class="line-width edge"/>
+                        Góc với Ox: <input class="line-width corner"/>
+                      </div>`;
+                $(".move-option").append(div);
+            }
+        });
+
+        $('.move-option').keyup(function(e) {
+            if (e.keyCode == 13) {
+                if (checkInputNotFocus() == true) {
+                    var mt = parseFloat($('#material-type').val());
+                    var t = parseFloat($('#thickness').val());
+                    var c = parseFloat($('#color').val());
+                    var l = parseFloat($('#long').val());
+                    var perimeter = 0;
+                    var canvas = document.getElementById("myCanvas");
+                    var ctx = canvas.getContext("2d");
+                    ctx.clearRect(0, 0, 500, 500);
+                    ctx.fillStyle = "#FF0000";
+                    ctx.beginPath();
+                    var x = 0;
+                    x += parseInt($('.begin-ox').val());
+                    var y = 0;
+                    y += parseInt($('.begin-ox').val());
+                    ctx.lineWidth = parseInt($('.thick-brace').val());
+                    ctx.moveTo(x, y);
+                    console.log("ctx.moveTo(" + x + ", " + y + ")");
+                    $('.item-move-option').each(function(index, element) {
+                        var h = parseInt($(element).find('.edge').val());
+                        var g = parseInt($(element).find('.corner').val());
+                        x += parseFloat((h * (Math.cos(g * (Math.PI / 180)))).toFixed());
+                        y += parseFloat((h * (Math.sin(g * (Math.PI / 180)))).toFixed());
+                        ctx.lineTo(x, y);
+                        console.log("ctx.lineTo(" + x + ", " + y + ")");
+                        perimeter += x;
+                    });
+                    ctx.stroke();
+                    var price = mt * t * c * l * perimeter / 10;
+                    console.log(price + "vnd");
+                }
+            }
+        });
+
+    });
+
+
+    function checkInput() {
+        var count = 0;
+        $('.choose-order input').each(function(i, e) {
+            if ($(e).val() == "") {
+                $(e).focus();
+                count++;
+                return false;
+            }
+        });
+        if (count == 0) return true;
+        else return false;
+    };
+
+    function checkInputNotFocus() {
+        var count = 0;
+        $('.choose-order input').each(function(i, e) {
+            if ($(e).val() == "") {
+                count++;
+                return false;
+            }
+        });
+        if (count == 0) return true;
+        else return false;
+    };
+    </script>
+</body>
+
+</html>
