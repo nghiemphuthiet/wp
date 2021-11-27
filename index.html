@@ -60,6 +60,19 @@
                     <span>a</span>: <input class="line-width edge" /> Góc với Ox: <input class="line-width corner" />
                 </div>
             </div>
+            <span class="price">
+                <span class="woocommerce-Price-amount amount"></span>
+            </span>
+            <div class="add-to-cart d-flex">
+                <div class="quantity-wrapper d-flex">
+                    <button type="button" class="quantity-minus">-</button>
+                    <div class="quantity">
+                        <input type="number" class="input-qty" step="1" min="1" max="" name="quantity" value="1" title="SL" size="4">
+                    </div>
+                    <button type="button" class="quantity-plus">+</button>
+                </div>
+                <button type="submit" class="single_add_to_cart_button button alt disabled wc-variation-selection-needed">Mua ngay</button>
+            </div>
         </div>
     </div>
     <style>
@@ -123,28 +136,70 @@
     .line-width {
         width: 50px
     }
+
+    .d-flex {
+        display: flex;
+    }
+
+    .quantity-wrapper {
+        position: relative;
+        border: 1px solid #ccc;
+        padding: 6px;
+        margin-right: 8px;
+    }
+
+    .quantity-wrapper button {
+        border-radius: 50%;
+        border: 0px;
+        width: 20px;
+        height: 20px;
+        position: absolute;
+        cursor: pointer;
+    }
+
+    .quantity-wrapper button:hover {
+        background-color: #ffc40e;
+        color: #fff;
+    }
+
+    .quantity-plus {
+        right: 6px;
+    }
+
+    .quantity-wrapper input {
+        outline: none;
+        padding-left: 32px;
+        width: 40px;
+        border: 0;
+    }
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
     $(document).ready(function() {
+        var mt = parseFloat($('#material-type').val());
+        var t = parseFloat($('#thickness').val());
+        var c = parseFloat($('#color').val());
+        var l = parseFloat($('#long').val());
         $("#addLine").click(function() {
             if (checkInput() == true) {
                 var text = $('.move-option').find('span').last().text();
                 var div = `<div class="item-move-option">
-                        <span>` + String.fromCharCode(text.charCodeAt() + 1) + `</span>: <input class="line-width edge"/>
-                        Góc với Ox: <input class="line-width corner"/>
-                      </div>`;
+                    <span>` + String.fromCharCode(text.charCodeAt() + 1) + `</span>: <input class="line-width edge"/>
+                    Góc với Ox: <input class="line-width corner"/>
+                  </div>`;
                 $(".move-option").append(div);
             }
         });
 
         $('.move-option').keyup(function(e) {
+            $('.woocommerce-Price-amount bdi').remove();
             if (e.keyCode == 13) {
                 if (checkInputNotFocus() == true) {
-                    var mt = parseFloat($('#material-type').val());
-                    var t = parseFloat($('#thickness').val());
-                    var c = parseFloat($('#color').val());
-                    var l = parseFloat($('#long').val());
+                    var heso = 100;
+                    mt = parseFloat($('#material-type').val());
+                    t = parseFloat($('#thickness').val());
+                    c = parseFloat($('#color').val());
+                    l = parseFloat($('#long').val());
                     var perimeter = 0;
                     var canvas = document.getElementById("myCanvas");
                     var ctx = canvas.getContext("2d");
@@ -155,7 +210,7 @@
                     x += parseInt($('.begin-ox').val());
                     var y = 0;
                     y += parseInt($('.begin-ox').val());
-                    ctx.lineWidth = parseInt($('.thick-brace').val());
+                    ctx.lineWidth = parseInt($('#thickness').val());
                     ctx.moveTo(x, y);
                     console.log("ctx.moveTo(" + x + ", " + y + ")");
                     $('.item-move-option').each(function(index, element) {
@@ -168,13 +223,35 @@
                         perimeter += x;
                     });
                     ctx.stroke();
-                    var price = mt * t * c * l * perimeter / 10;
+                    var price = mt * t * c * l * perimeter / heso;
+                    var newPrice = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(price);
+                    console.log(newPrice);
+                    $('.woocommerce-Price-amount').append(`<bdi price="` + price + `">` + newPrice + `</bdi>`);
                     console.log(price + "vnd");
                 }
             }
         });
+        $('.quantity-minus').on('click', function() {
+            if (parseInt($('.input-qty').val()) > 1) {
+                var minus = $('.input-qty').val();
+                minus--;
+                $('.input-qty').val(minus);
+            }
+        });
+        $('.quantity-plus').on('click', function() {
+            var plus = $('.input-qty').val();
+            plus++;
+            $('.input-qty').val(plus);
+        });
 
+        $('.item-option select').change(function() {
+            var e = $.Event("keyup");
+            e.which = 13;
+            e.keyCode = 13;
+            $('.move-option').trigger(e);
+        });
     });
+
 
 
     function checkInput() {
