@@ -26,6 +26,13 @@
                             <option value="1.2">1.2</option>
                         </select>
                     </div>
+                    <div class="item-option">
+                        Soi góc?:
+                        <select id="angle">
+                            <option value="1">Soi</option>
+                            <option value="0">Không soi</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="items-option">
                     <div class="item-option">
@@ -191,7 +198,7 @@
             }
         });
 
-        $('.move-option').keyup(function(e) {
+        $('.move-option, .add-line').keyup(function(e) {
             $('.woocommerce-Price-amount bdi').remove();
             if (e.keyCode == 13) {
                 if (checkInputNotFocus() == true) {
@@ -204,30 +211,32 @@
                     var canvas = document.getElementById("myCanvas");
                     var ctx = canvas.getContext("2d");
                     ctx.clearRect(0, 0, 500, 500);
-                    ctx.fillStyle = "#FF0000";
+                    ctx.lineWidth = parseInt($('#thickness').val());
+                    if ($('#angle').val() == 1) {
+                        // soi
+                        ctx.lineJoin = 'miter';
+                    } else {
+                        // không soi
+                        ctx.lineJoin = 'round';
+                    }
                     ctx.beginPath();
                     var x = 0;
                     x += parseInt($('.begin-ox').val());
                     var y = 0;
-                    y += parseInt($('.begin-ox').val());
-                    ctx.lineWidth = parseInt($('#thickness').val());
+                    y += parseInt($('.begin-oy').val());
                     ctx.moveTo(x, y);
-                    console.log("ctx.moveTo(" + x + ", " + y + ")");
                     $('.item-move-option').each(function(index, element) {
                         var h = parseInt($(element).find('.edge').val());
                         var g = parseInt($(element).find('.corner').val());
                         x += parseFloat((h * (Math.cos(g * (Math.PI / 180)))).toFixed());
                         y += parseFloat((h * (Math.sin(g * (Math.PI / 180)))).toFixed());
                         ctx.lineTo(x, y);
-                        console.log("ctx.lineTo(" + x + ", " + y + ")");
                         perimeter += x;
                     });
                     ctx.stroke();
                     var price = mt * t * c * l * perimeter / heso;
                     var newPrice = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(price);
-                    console.log(newPrice);
                     $('.woocommerce-Price-amount').append(`<bdi price="` + price + `">` + newPrice + `</bdi>`);
-                    console.log(price + "vnd");
                 }
             }
         });
@@ -236,12 +245,20 @@
                 var minus = $('.input-qty').val();
                 minus--;
                 $('.input-qty').val(minus);
+                var price = ($('.woocommerce-Price-amount bdi').attr('price') * minus) / (minus + 1);
+                $('.woocommerce-Price-amount bdi').remove();
+                var newPrice = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(price);
+                $('.woocommerce-Price-amount').append(`<bdi price="` + price + `">` + newPrice + `</bdi>`);
             }
         });
         $('.quantity-plus').on('click', function() {
             var plus = $('.input-qty').val();
             plus++;
             $('.input-qty').val(plus);
+            var price = ($('.woocommerce-Price-amount bdi').attr('price') * plus) / (plus - 1);
+            $('.woocommerce-Price-amount bdi').remove();
+            var newPrice = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(price);
+            $('.woocommerce-Price-amount').append(`<bdi price="` + price + `">` + newPrice + `</bdi>`);
         });
 
         $('.item-option select').change(function() {
