@@ -72,13 +72,13 @@
             </span>
             <div class="add-to-cart d-flex">
                 <div class="quantity-wrapper d-flex">
-                    <button type="button" class="quantity-minus">-</button>
+                    <button type="button" class="woo-quantity-btn woo-quantity-minus quantity-minus"><i class="bx bx-minus"></i></button>
                     <div class="quantity">
                         <input type="number" class="input-qty" step="1" min="1" max="" name="quantity" value="1" title="SL" size="4">
                     </div>
-                    <button type="button" class="quantity-plus">+</button>
+                    <button type="button" class="woo-quantity-btn woo-quantity-plus quantity-plus"><i class="bx bx-plus"></i></button>
                 </div>
-                <button type="submit" class="single_add_to_cart_button button alt disabled wc-variation-selection-needed">Mua ngay</button>
+                <button type="submit" class="btn-add-to-cart">Mua ngay</button>
             </div>
         </div>
     </div>
@@ -169,15 +169,17 @@
         color: #fff;
     }
 
-    .quantity-plus {
-        right: 6px;
-    }
-
     .quantity-wrapper input {
         outline: none;
-        padding-left: 32px;
-        width: 40px;
+        padding-left: 45px;
+        width: 100px;
         border: 0;
+    }
+
+    .quantity-wrapper input::-webkit-outer-spin-button,
+    .quantity-wrapper input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
     }
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -241,7 +243,7 @@
             }
         });
         $('.quantity-minus').on('click', function() {
-            if (parseInt($('.input-qty').val()) > 1) {
+            if (checkInput() == true && parseInt($('.input-qty').val()) > 1) {
                 var minus = $('.input-qty').val();
                 minus--;
                 $('.input-qty').val(minus);
@@ -252,13 +254,15 @@
             }
         });
         $('.quantity-plus').on('click', function() {
-            var plus = $('.input-qty').val();
-            plus++;
-            $('.input-qty').val(plus);
-            var price = ($('.woocommerce-Price-amount bdi').attr('price') * plus) / (plus - 1);
-            $('.woocommerce-Price-amount bdi').remove();
-            var newPrice = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(price);
-            $('.woocommerce-Price-amount').append(`<bdi price="` + price + `">` + newPrice + `</bdi>`);
+            if (checkInput() == true) {
+                var plus = $('.input-qty').val();
+                plus++;
+                $('.input-qty').val(plus);
+                var price = ($('.woocommerce-Price-amount bdi').attr('price') * plus) / (plus - 1);
+                $('.woocommerce-Price-amount bdi').remove();
+                var newPrice = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(price);
+                $('.woocommerce-Price-amount').append(`<bdi price="` + price + `">` + newPrice + `</bdi>`);
+            }
         });
 
         $('.item-option select').change(function() {
